@@ -6,12 +6,12 @@ use Dormilich\HttpClient\Decoder\DecoderInterface;
 use Dormilich\HttpClient\Encoder\EncoderInterface;
 use Dormilich\HttpClient\Exception\RequestException;
 use Dormilich\HttpClient\Exception\UnsupportedDataTypeException;
+use Dormilich\HttpClient\Utility\Header;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestFactoryInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 
 use const DATE_RFC7231;
@@ -25,7 +25,7 @@ class Client
 {
     private ClientInterface $client;
 
-    private ServerRequestFactoryInterface $factory;
+    private RequestFactoryInterface $factory;
 
     /**
      * @var Header HTTP headers to send with every request.
@@ -44,13 +44,13 @@ class Client
 
     /**
      * @param ClientInterface $client
-     * @param ServerRequestFactoryInterface $factory
+     * @param RequestFactoryInterface $factory
      * @param EncoderInterface[] $encoders
      * @param DecoderInterface[] $decoders
      */
     public function __construct(
         ClientInterface $client,
-        ServerRequestFactoryInterface $factory,
+        RequestFactoryInterface $factory,
         iterable $encoders = [],
         iterable $decoders = []
     ) {
@@ -135,7 +135,7 @@ class Client
      */
     public function fetch(string $method, $uri, $data = null, iterable $header = [])
     {
-        $request = $this->createServerRequest($method, $uri);
+        $request = $this->createRequest($method, $uri);
         $request = $this->addRequestHeaders($request, new Header($header));
         $request = $this->addRequestData($request, $data);
         $request = $this->postProcessRequest($request);
@@ -214,22 +214,22 @@ class Client
     /**
      * @param string $method
      * @param UriInterface|string $uri
-     * @return ServerRequestInterface
+     * @return RequestInterface
      */
-    public function createServerRequest(string $method, $uri): ServerRequestInterface
+    public function createRequest(string $method, $uri): RequestInterface
     {
-        return $this->factory->createServerRequest(strtoupper($method), $uri, []);
+        return $this->factory->createRequest(strtoupper($method), $uri, []);
     }
 
     /**
      * Add payload data to the request.
      *
-     * @param ServerRequestInterface $request
+     * @param RequestInterface $request
      * @param mixed $data
-     * @return ServerRequestInterface
+     * @return RequestInterface
      * @throws UnsupportedDataTypeException
      */
-    private function addRequestData(ServerRequestInterface $request, $data): ServerRequestInterface
+    private function addRequestData(RequestInterface $request, $data): RequestInterface
     {
         if (null === $data) {
             return $request;
@@ -247,11 +247,11 @@ class Client
     /**
      * Run all encoders that may modify the prepared request.
      *
-     * @param ServerRequestInterface $request
-     * @return ServerRequestInterface
+     * @param RequestInterface $request
+     * @return RequestInterface
      * @throws RequestException
      */
-    private function postProcessRequest(ServerRequestInterface $request): ServerRequestInterface
+    private function postProcessRequest(RequestInterface $request): RequestInterface
     {
         foreach ($this->encoder as $encoder) {
             if ($encoder->supports($request)) {
@@ -265,13 +265,13 @@ class Client
     /**
      * Execute encoder with the request data.
      *
-     * @param ServerRequestInterface $request
+     * @param RequestInterface $request
      * @param EncoderInterface $encoder
      * @param mixed $data
-     * @return ServerRequestInterface
+     * @return RequestInterface
      * @throws RequestException
      */
-    private function encode(ServerRequestInterface $request, EncoderInterface $encoder, $data): ServerRequestInterface
+    private function encode(RequestInterface $request, EncoderInterface $encoder, $data): RequestInterface
     {
         try {
             return $encoder->serialize($request, $data);
@@ -286,7 +286,7 @@ class Client
      *
      * @param RequestInterface $request
      * @param Header $headers
-     * @return RequestInterface|ServerRequestInterface
+     * @return RequestInterface
      */
     private function addRequestHeaders(RequestInterface $request, Header $headers): RequestInterface
     {

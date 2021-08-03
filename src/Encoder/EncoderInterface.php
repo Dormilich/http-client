@@ -3,7 +3,7 @@
 namespace Dormilich\HttpClient\Encoder;
 
 use Dormilich\HttpClient\Exception\EncoderException;
-use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Plugin interface to set the request data.
@@ -28,10 +28,10 @@ interface EncoderInterface
     /**
      * Add data to the request.
      *
-     * @param ServerRequestInterface $request
+     * @param RequestInterface $request
      * @param mixed $data
-     * @return ServerRequestInterface
+     * @return RequestInterface
      * @throws EncoderException
      */
-    public function serialize(ServerRequestInterface $request, $data): ServerRequestInterface;
+    public function serialize(RequestInterface $request, $data): RequestInterface;
 }

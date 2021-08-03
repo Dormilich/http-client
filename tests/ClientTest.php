@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests;
+
 use Dormilich\HttpClient\Client;
 use Dormilich\HttpClient\Decoder\DecoderInterface;
 use Dormilich\HttpClient\Encoder\EncoderInterface;
@@ -8,23 +10,22 @@ use Dormilich\HttpClient\Exception\UnsupportedDataTypeException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestFactoryInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 
 /**
  * @covers \Dormilich\HttpClient\Client
  * @covers \Dormilich\HttpClient\Exception\RequestException
  * @covers \Dormilich\HttpClient\Exception\UnsupportedDataTypeException
- * @uses \Dormilich\HttpClient\Header
+ * @uses \Dormilich\HttpClient\Utility\Header
  */
 class ClientTest extends TestCase
 {
     private function request()
     {
-        $request = $this->createStub(ServerRequestInterface::class);
+        $request = $this->createStub(RequestInterface::class);
         $request
             ->method('withAddedHeader')
             ->willReturnSelf();
@@ -56,11 +57,11 @@ class ClientTest extends TestCase
         return $response;
     }
 
-    private function factory(ServerRequestInterface $request = null)
+    private function factory(RequestInterface $request = null)
     {
-        $factory = $this->createStub(ServerRequestFactoryInterface::class);
+        $factory = $this->createStub(RequestFactoryInterface::class);
         $factory
-            ->method('createServerRequest')
+            ->method('createRequest')
             ->willReturn($request ?: $this->request());
 
         return $factory;
@@ -83,10 +84,10 @@ class ClientTest extends TestCase
     {
         $url = 'https://example.com/api/user/42';
 
-        $factory = $this->createMock(ServerRequestFactoryInterface::class);
+        $factory = $this->createMock(RequestFactoryInterface::class);
         $factory
             ->expects($this->once())
-            ->method('createServerRequest')
+            ->method('createRequest')
             ->with(
                 $this->identicalTo('GET'),
                 $this->identicalTo($url)
@@ -101,10 +102,10 @@ class ClientTest extends TestCase
     {
         $url = 'https://example.com/api/user/42';
 
-        $factory = $this->createMock(ServerRequestFactoryInterface::class);
+        $factory = $this->createMock(RequestFactoryInterface::class);
         $factory
             ->expects($this->once())
-            ->method('createServerRequest')
+            ->method('createRequest')
             ->with(
                 $this->identicalTo('POST'),
                 $this->identicalTo($url)
@@ -119,10 +120,10 @@ class ClientTest extends TestCase
     {
         $url = 'https://example.com/api/user/42';
 
-        $factory = $this->createMock(ServerRequestFactoryInterface::class);
+        $factory = $this->createMock(RequestFactoryInterface::class);
         $factory
             ->expects($this->once())
-            ->method('createServerRequest')
+            ->method('createRequest')
             ->with(
                 $this->identicalTo('PUT'),
                 $this->identicalTo($url)
@@ -137,10 +138,10 @@ class ClientTest extends TestCase
     {
         $url = 'https://example.com/api/user/42';
 
-        $factory = $this->createMock(ServerRequestFactoryInterface::class);
+        $factory = $this->createMock(RequestFactoryInterface::class);
         $factory
             ->expects($this->once())
-            ->method('createServerRequest')
+            ->method('createRequest')
             ->with(
                 $this->identicalTo('PATCH'),
                 $this->identicalTo($url)
@@ -155,10 +156,10 @@ class ClientTest extends TestCase
     {
         $url = 'https://example.com/api/user/42';
 
-        $factory = $this->createMock(ServerRequestFactoryInterface::class);
+        $factory = $this->createMock(RequestFactoryInterface::class);
         $factory
             ->expects($this->once())
-            ->method('createServerRequest')
+            ->method('createRequest')
             ->with(
                 $this->identicalTo('DELETE'),
                 $this->identicalTo($url)
@@ -171,7 +172,7 @@ class ClientTest extends TestCase
 
     public function testSetRequestHeaders()
     {
-        $request = $this->createMock(ServerRequestInterface::class);
+        $request = $this->createMock(RequestInterface::class);
         $request
             ->expects($this->exactly(2))
             ->method('withHeader')
@@ -190,7 +191,7 @@ class ClientTest extends TestCase
 
     public function testSetAdditionalHeaders()
     {
-        $request = $this->createMock(ServerRequestInterface::class);
+        $request = $this->createMock(RequestInterface::class);
         $request
             ->method('withHeader')
             ->willReturnSelf();
@@ -211,7 +212,7 @@ class ClientTest extends TestCase
 
     public function testSetDefaultHeaders()
     {
-        $request = $this->createMock(ServerRequestInterface::class);
+        $request = $this->createMock(RequestInterface::class);
         $request
             ->method('withHeader')
             ->willReturnSelf();
@@ -379,7 +380,7 @@ class ClientTest extends TestCase
     {
         $http = $this->http('failure', 200);
 
-        $request = $this->createMock(ServerRequestInterface::class);
+        $request = $this->createMock(RequestInterface::class);
         $request
             ->method('withAddedHeader')
             ->willReturnSelf();

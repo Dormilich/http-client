@@ -30,6 +30,11 @@
             "Dormilich\\HttpClient\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "scripts": {
         "test": "phpunit",
         "testsuite": "phpdbg -qrr vendor/bin/phpunit"

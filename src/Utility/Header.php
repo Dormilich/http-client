@@ -1,6 +1,6 @@
 <?php
 
-namespace Dormilich\HttpClient;
+namespace Dormilich\HttpClient\Utility;
 
 use function array_key_exists;
 use function count;

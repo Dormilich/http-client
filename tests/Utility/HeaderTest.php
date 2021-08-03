@@ -1,10 +1,12 @@
 <?php
 
-use Dormilich\HttpClient\Header;
+namespace Tests\Utility;
+
+use Dormilich\HttpClient\Utility\Header;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Dormilich\HttpClient\Header
+ * @covers \Dormilich\HttpClient\Utility\Header
  */
 class HeaderTest extends TestCase
 {
