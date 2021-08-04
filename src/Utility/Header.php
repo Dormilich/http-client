@@ -225,7 +225,7 @@ class Header implements \ArrayAccess, \Countable, \Iterator
      * Store HTTP header.
      *
      * @param string $key HTTP header name.
-     * @param iterable $values HTTP header content.
+     * @param string[] $values HTTP header content.
      */
     private function setValues(string $key, iterable $values): void
     {

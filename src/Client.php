@@ -128,7 +128,7 @@ class Client
      * @param string $method HTTP method.
      * @param string|UriInterface $uri Target URI.
      * @param mixed $data Data payload.
-     * @param iterable $header Additional request headers.
+     * @param iterable<string,string|string[]> $header Additional request headers.
      * @return mixed
      * @throws RequestException
      * @throws UnsupportedDataTypeException
@@ -137,7 +137,7 @@ class Client
     {
         $request = $this->createRequest($method, $uri);
         $request = $this->addRequestHeaders($request, new Header($header));
-        $request = $this->addRequestData($request, $data);
+        $request = $this->setRequestData($request, $data);
         $request = $this->postProcessRequest($request);
 
         return $this->request($request);
@@ -229,7 +229,7 @@ class Client
      * @return RequestInterface
      * @throws UnsupportedDataTypeException
      */
-    private function addRequestData(RequestInterface $request, $data): RequestInterface
+    private function setRequestData(RequestInterface $request, $data): RequestInterface
     {
         if (null === $data) {
             return $request;
