@@ -2,25 +2,23 @@
 
 namespace Dormilich\HttpClient\Decoder;
 
-use Dormilich\HttpClient\Utility\QueryParser;
+use Dormilich\HttpClient\Exception\DecoderException;
+use Dormilich\HttpClient\Transformer\TransformerInterface;
 use Psr\Http\Message\ResponseInterface;
 
-/**
- * Parse form data.
- */
-class UrlDecoder implements DecoderInterface
+class Decoder implements DecoderInterface
 {
-    private QueryParser $decoder;
+    private TransformerInterface $transformer;
 
     use ContentTypeTrait;
     use StatusCodeTrait;
 
     /**
-     * @param QueryParser $decoder
+     * @param TransformerInterface $transformer
      */
-    public function __construct(QueryParser $decoder)
+    public function __construct(TransformerInterface $transformer)
     {
-        $this->decoder = $decoder;
+        $this->transformer = $transformer;
     }
 
     /**
@@ -28,7 +26,7 @@ class UrlDecoder implements DecoderInterface
      */
     public function getContentType(): string
     {
-        return 'application/x-www-form-urlencoded';
+        return $this->transformer->contentType();
     }
 
     /**
@@ -45,6 +43,6 @@ class UrlDecoder implements DecoderInterface
     public function unserialize(ResponseInterface $response)
     {
         $content = (string) $response->getBody();
-        return $this->decoder->decode($content);
+        return $this->transformer->decode($content);
     }
 }

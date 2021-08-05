@@ -28,6 +28,19 @@ trait ContentTrait
     }
 
     /**
+     * Add the query to the request URI.
+     *
+     * @param RequestInterface $request
+     * @param string $query
+     * @return RequestInterface
+     */
+    protected function setQuery(RequestInterface $request, string $query): RequestInterface
+    {
+        $uri = $request->getUri()->withQuery($query);
+        return $request->withUri($uri);
+    }
+
+    /**
      * Add the body to the request and set common headers.
      *
      * @param RequestInterface $request

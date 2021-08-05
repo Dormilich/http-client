@@ -19,6 +19,7 @@
         "ext-dom": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
+        "ext-simplexml": "*",
         "psr/http-client": "^1.0",
         "psr/http-factory": "^1.0"
     },

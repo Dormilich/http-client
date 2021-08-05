@@ -2,8 +2,8 @@
 
 namespace Tests\Decoder;
 
-use Dormilich\HttpClient\Decoder\DomDecoder;
-use Dormilich\HttpClient\Exception\DecoderException;
+use Dormilich\HttpClient\Decoder\Decoder;
+use Dormilich\HttpClient\Transformer\TransformerInterface;
 use Dormilich\HttpClient\Utility\StatusMatcher;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -11,18 +11,24 @@ use Psr\Http\Message\StreamInterface;
 
 /**
  * @covers \Dormilich\HttpClient\Decoder\ContentTypeTrait
- * @covers \Dormilich\HttpClient\Decoder\DomDecoder
+ * @covers \Dormilich\HttpClient\Decoder\Decoder
  * @covers \Dormilich\HttpClient\Decoder\StatusCodeTrait
  * @uses \Dormilich\HttpClient\Utility\StatusMatcher
- * @uses \Dormilich\HttpClient\Utility\Header
  */
-class DomDecoderTest extends TestCase
+class DecoderTest extends TestCase
 {
-    public function testDecoderHasXmlType()
+    public function testEncoderContentType()
     {
-        $decoder = new DomDecoder();
+        $type = uniqid();
 
-        $this->assertSame('application/xml', $decoder->getContentType());
+        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer
+            ->method('contentType')
+            ->willReturn($type);
+
+        $decoder = new Decoder($transformer);
+
+        $this->assertSame($type, $decoder->getContentType());
     }
 
     /**
@@ -33,15 +39,21 @@ class DomDecoderTest extends TestCase
      */
     public function testDecoderMatchesAnyStatusWithoutMatcher(int $code)
     {
+        $type = uniqid();
+
+        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer
+            ->method('contentType')
+            ->willReturn($type);
         $response = $this->createStub(ResponseInterface::class);
         $response
             ->method('getStatusCode')
             ->willReturn($code);
         $response
             ->method('getHeaderLine')
-            ->willReturn('application/xml');
+            ->willReturn($type);
 
-        $decoder = new DomDecoder();
+        $decoder = new Decoder($transformer);
 
         $this->assertTrue($decoder->supports($response));
     }
@@ -52,27 +64,36 @@ class DomDecoderTest extends TestCase
      */
     public function testDecoderMatchesDefinedStatusCodes(int $code, bool $isMatch)
     {
+        $type = uniqid();
+
+        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer
+            ->method('contentType')
+            ->willReturn($type);
         $response = $this->createStub(ResponseInterface::class);
         $response
             ->method('getStatusCode')
             ->willReturn($code);
         $response
             ->method('getHeaderLine')
-            ->willReturn('application/xml');
+            ->willReturn($type);
 
-        $decoder = new DomDecoder();
+        $decoder = new Decoder($transformer);
         $decoder->setStatusMatcher(StatusMatcher::success());
 
         $this->assertSame($isMatch, $decoder->supports($response));
     }
 
     /**
-     * @testWith ["application/xml"]
-     *           ["application/xhtml+xml"]
-     *           ["application/xml; charset=UTF-16"]
+     * @testWith ["application/json"]
+     *           ["application/vnd.api+json"]
      */
     public function testDecoderMatchesContentTypes(string $type)
     {
+        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer
+            ->method('contentType')
+            ->willReturn('application/json');
         $response = $this->createStub(ResponseInterface::class);
         $response
             ->method('getStatusCode')
@@ -81,13 +102,17 @@ class DomDecoderTest extends TestCase
             ->method('getHeaderLine')
             ->willReturn($type);
 
-        $decoder = new DomDecoder();
+        $decoder = new Decoder($transformer);
 
         $this->assertTrue($decoder->supports($response));
     }
 
     public function testDecoderIgnoresInvalidContentType()
     {
+        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer
+            ->method('contentType')
+            ->willReturn('application/json');
         $response = $this->createStub(ResponseInterface::class);
         $response
             ->method('getStatusCode')
@@ -96,48 +121,34 @@ class DomDecoderTest extends TestCase
             ->method('getHeaderLine')
             ->willReturn('application/octet-stream');
 
-        $decoder = new DomDecoder();
+        $decoder = new Decoder($transformer);
 
         $this->assertFalse($decoder->supports($response));
     }
 
-    public function testDecodeXml()
+    public function testDecodeResponse()
     {
-        $xml = "<?xml version=\"1.0\"?>\n<root>test</root>";
+        $data = new \stdClass();
+        $content = uniqid();
 
+        $transformer = $this->createMock(TransformerInterface::class);
+        $transformer
+            ->expects($this->once())
+            ->method('decode')
+            ->with($this->identicalTo($content))
+            ->willReturn($data);
         $stream = $this->createStub(StreamInterface::class);
         $stream
             ->method('__toString')
-            ->willReturn($xml);
+            ->willReturn($content);
         $response = $this->createStub(ResponseInterface::class);
         $response
             ->method('getBody')
             ->willReturn($stream);
 
-        $decoder = new DomDecoder();
+        $decoder = new Decoder($transformer);
         $result = $decoder->unserialize($response);
 
-        $this->assertInstanceOf(\DOMDocument::class, $result);
-        $this->assertSame('root', $result->documentElement->tagName);
-        $this->assertSame('test', $result->documentElement->textContent);
-    }
-
-    public function testDecodeInvalidXmlFails()
-    {
-        $this->expectException(DecoderException::class);
-        $this->expectExceptionCode(E_WARNING);
-        $this->expectExceptionMessage('Start tag expected');
-
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('__toString')
-            ->willReturn('test');
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getBody')
-            ->willReturn($stream);
-
-        $decoder = new DomDecoder();
-        $decoder->unserialize($response);
+        $this->assertSame($data, $result);
     }
 }
