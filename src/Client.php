@@ -2,16 +2,21 @@
 
 namespace Dormilich\HttpClient;
 
+use Dormilich\HttpClient\Decoder\Decoder;
 use Dormilich\HttpClient\Decoder\DecoderInterface;
+use Dormilich\HttpClient\Encoder\Encoder;
 use Dormilich\HttpClient\Encoder\EncoderInterface;
 use Dormilich\HttpClient\Exception\RequestException;
 use Dormilich\HttpClient\Exception\UnsupportedDataTypeException;
+use Dormilich\HttpClient\Transformer\TransformerInterface;
 use Dormilich\HttpClient\Utility\Header;
+use Dormilich\HttpClient\Utility\StatusMatcher;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\UriInterface;
 
 use const DATE_RFC7231;
@@ -25,7 +30,9 @@ class Client
 {
     private ClientInterface $client;
 
-    private RequestFactoryInterface $factory;
+    private RequestFactoryInterface $requestFactory;
+
+    private StreamFactoryInterface $streamFactory;
 
     /**
      * @var Header HTTP headers to send with every request.
@@ -44,26 +51,18 @@ class Client
 
     /**
      * @param ClientInterface $client
-     * @param RequestFactoryInterface $factory
-     * @param EncoderInterface[] $encoders
-     * @param DecoderInterface[] $decoders
+     * @param RequestFactoryInterface $requestFactory
+     * @param StreamFactoryInterface $streamFactory
      */
     public function __construct(
         ClientInterface $client,
-        RequestFactoryInterface $factory,
-        iterable $encoders = [],
-        iterable $decoders = []
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory
     ) {
-        $this->client = $client;
-        $this->factory = $factory;
         $this->header = new Header();
-
-        foreach ($encoders as $encoder) {
-            $this->addEncoder($encoder);
-        }
-        foreach ($decoders as $decoder) {
-            $this->addDecoder($decoder);
-        }
+        $this->client = $client;
+        $this->requestFactory = $requestFactory;
+        $this->streamFactory = $streamFactory;
     }
 
     /**
@@ -72,6 +71,23 @@ class Client
     public function getHeaders(): Header
     {
         return $this->header;
+    }
+
+    /**
+     * Add encoder and decoder for a transformer.
+     *
+     * @param TransformerInterface $transformer
+     * @param StatusMatcher|null $matcher
+     * @return self
+     */
+    public function addTransformer(TransformerInterface $transformer, StatusMatcher $matcher = null): self
+    {
+        $encoder = new Encoder($this->streamFactory, $transformer);
+        $decoder = new Decoder($transformer);
+        if ($matcher) {
+            $decoder->setStatusMatcher($matcher);
+        }
+        return $this->addDecoder($decoder)->addEncoder($encoder);
     }
 
     /**
@@ -110,6 +126,7 @@ class Client
     {
         $request = $this->addRequestHeaders($request, $this->header);
         $request = $this->setAcceptHeader($request);
+        $request = $this->postProcessRequest($request);
 
         $response = $this->doRequest($request);
 
@@ -138,7 +155,6 @@ class Client
         $request = $this->createRequest($method, $uri);
         $request = $this->addRequestHeaders($request, new Header($header));
         $request = $this->setRequestData($request, $data);
-        $request = $this->postProcessRequest($request);
 
         return $this->request($request);
     }
@@ -218,7 +234,7 @@ class Client
      */
     public function createRequest(string $method, $uri): RequestInterface
     {
-        return $this->factory->createRequest(strtoupper($method), $uri, []);
+        return $this->requestFactory->createRequest(strtoupper($method), $uri, []);
     }
 
     /**
