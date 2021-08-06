@@ -12,7 +12,6 @@ class ContentLength implements EncoderInterface
     public function supports($data): bool
     {
         return ($data instanceof RequestInterface)
-           and ($data->getMethod() !== 'GET')
            and !$data->hasHeader('Transfer-Encoding');
     }
 
