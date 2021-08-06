@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \Dormilich\HttpClient\Transformer\UrlTransformer
- * @uses \Dormilich\HttpClient\Utility\PhpQueryParser
+ * @uses \Dormilich\HttpClient\Utility\PhpQuery
  */
 class UrlTransformerTest extends TestCase
 {

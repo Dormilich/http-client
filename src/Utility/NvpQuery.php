@@ -4,6 +4,7 @@ namespace Dormilich\HttpClient\Utility;
 
 use Dormilich\HttpClient\Exception\EncoderException;
 
+use function array_key_exists;
 use function array_map;
 use function explode;
 use function is_array;
@@ -11,7 +12,6 @@ use function is_int;
 use function is_iterable;
 use function is_scalar;
 use function ltrim;
-use function property_exists;
 use function rawurlencode;
 use function str_replace;
 use function strlen;
@@ -20,7 +20,7 @@ use function strlen;
  * Encode/decode query parameters as strict name-value pairs. This does not support
  * nested structures (except for plain arrays).
  */
-class NvpQueryParser implements QueryParser
+class NvpQuery implements QueryParser
 {
     /**
      * @inheritDoc
@@ -119,18 +119,18 @@ class NvpQueryParser implements QueryParser
      * Decode query parameters.
      *
      * @param array $data
-     * @return \stdClass
+     * @return array
      */
-    private function parseQueryParams(array $data): \stdClass
+    private function parseQueryParams(array $data): array
     {
-        $nvp = new \stdClass();
+        $nvp = [];
 
         foreach ($data as $item) {
             [ $key, $value ] = $this->getDataItem($item);
-            if (property_exists($nvp, $key)) {
-                $value = $this->getDataValue($nvp->{$key}, $value);
+            if (array_key_exists($key, $nvp)) {
+                $value = $this->getDataValue($nvp[$key], $value);
             }
-            $nvp->{$key} = $value;
+            $nvp[$key] = $value;
         }
 
         return $nvp;

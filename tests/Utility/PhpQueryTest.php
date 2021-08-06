@@ -2,17 +2,17 @@
 
 namespace Tests\Utility;
 
-use Dormilich\HttpClient\Utility\PhpQueryParser;
+use Dormilich\HttpClient\Utility\PhpQuery;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Dormilich\HttpClient\Utility\PhpQueryParser
+ * @covers \Dormilich\HttpClient\Utility\PhpQuery
  */
-class PhpQueryParserTest extends TestCase
+class PhpQueryTest extends TestCase
 {
     public function testEncodeEmptyArray()
     {
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $query = $service->encode([]);
 
         $this->assertSame('', $query);
@@ -20,7 +20,7 @@ class PhpQueryParserTest extends TestCase
 
     public function testDecodeEmptyQuery()
     {
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $data = $service->decode('');
 
         $this->assertEquals([], $data);
@@ -31,7 +31,7 @@ class PhpQueryParserTest extends TestCase
         $data['foo'] = 'bar';
         $data['xxx'] = 1;
 
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('foo=bar&xxx=1', $query);
@@ -43,7 +43,7 @@ class PhpQueryParserTest extends TestCase
         $data['foo'] = 'bar';
         $data['xxx'] = 1;
 
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('foo=bar&xxx=1', $query);
@@ -51,7 +51,7 @@ class PhpQueryParserTest extends TestCase
 
     public function testDecodeArray()
     {
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $data = $service->decode('foo=bar&xxx=1');
 
         $exp['foo'] = 'bar';
@@ -63,7 +63,7 @@ class PhpQueryParserTest extends TestCase
     {
         $data['xxx'] = ['foo', 'bar'];
 
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('xxx%5B0%5D=foo&xxx%5B1%5D=bar', $query);
@@ -71,7 +71,7 @@ class PhpQueryParserTest extends TestCase
 
     public function testDecodeList()
     {
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $data = $service->decode('xxx%5B0%5D=foo&xxx%5B1%5D=bar');
 
         $exp['xxx'] = ['foo', 'bar'];
@@ -82,7 +82,7 @@ class PhpQueryParserTest extends TestCase
     {
         $data['foo']['bar'] = 1;
 
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('foo%5Bbar%5D=1', $query);
@@ -90,7 +90,7 @@ class PhpQueryParserTest extends TestCase
 
     public function testDecodeNestedArray()
     {
-        $service = new PhpQueryParser();
+        $service = new PhpQuery();
         $data = $service->decode('foo%5Bbar%5D=1');
 
         $exp['foo']['bar'] = 1;

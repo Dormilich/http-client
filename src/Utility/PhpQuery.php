@@ -12,7 +12,7 @@ use function parse_str;
 /**
  * Encode and decode URL parameters in PHP style (using square brackets for nested data).
  */
-class PhpQueryParser implements QueryParser
+class PhpQuery implements QueryParser
 {
     /**
      * @inheritDoc

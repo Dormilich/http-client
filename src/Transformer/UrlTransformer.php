@@ -2,7 +2,7 @@
 
 namespace Dormilich\HttpClient\Transformer;
 
-use Dormilich\HttpClient\Utility\PhpQueryParser;
+use Dormilich\HttpClient\Utility\PhpQuery;
 use Dormilich\HttpClient\Utility\QueryParser;
 
 use function is_array;
@@ -16,7 +16,7 @@ class UrlTransformer implements TransformerInterface
      */
     public function __construct(QueryParser $parser = null)
     {
-        $this->parser = $parser ?: new PhpQueryParser();
+        $this->parser = $parser ?: new PhpQuery();
     }
 
     /**

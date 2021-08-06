@@ -3,28 +3,17 @@
 namespace Tests\Utility;
 
 use Dormilich\HttpClient\Exception\EncoderException;
-use Dormilich\HttpClient\Utility\NvpQueryParser;
+use Dormilich\HttpClient\Utility\NvpQuery;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @covers \Dormilich\HttpClient\Utility\NvpQueryParser
+ * @covers \Dormilich\HttpClient\Utility\NvpQuery
  */
-class NvpQueryParserTest extends TestCase
+class NvpQueryTest extends TestCase
 {
-    private function toObject(array $data): \stdClass
-    {
-        $object = new \stdClass();
-
-        foreach ($data as $key => $value) {
-            $object->{$key} = $value;
-        }
-
-        return $object;
-    }
-
     public function testEncodeEmptyArray()
     {
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $query = $service->encode([]);
 
         $this->assertSame('', $query);
@@ -32,10 +21,10 @@ class NvpQueryParserTest extends TestCase
 
     public function testDecodeEmptyQuery()
     {
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $data = $service->decode('');
 
-        $this->assertEquals(new \stdClass(), $data);
+        $this->assertEquals([], $data);
     }
 
     public function testEncodeAssociativeArray()
@@ -43,7 +32,7 @@ class NvpQueryParserTest extends TestCase
         $data['foo'] = 'bar';
         $data['xxx'] = 1;
 
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('foo=bar&xxx=1', $query);
@@ -55,7 +44,7 @@ class NvpQueryParserTest extends TestCase
         $data['foo'] = 'bar';
         $data['xxx'] = 1;
 
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('foo=bar&xxx=1', $query);
@@ -63,19 +52,19 @@ class NvpQueryParserTest extends TestCase
 
     public function testDecodeObject()
     {
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $data = $service->decode('foo=bar&xxx=1');
 
         $exp['foo'] = 'bar';
         $exp['xxx'] = '1';
-        $this->assertEquals($this->toObject($exp), $data);
+        $this->assertEquals($exp, $data);
     }
 
     public function testEncodeList()
     {
         $data['xxx'] = ['foo', 'bar'];
 
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('xxx=foo&xxx=bar', $query);
@@ -83,11 +72,11 @@ class NvpQueryParserTest extends TestCase
 
     public function testDecodeList()
     {
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $data = $service->decode('xxx=foo&xxx=bar&xxx=baz');
 
         $exp['xxx'] = ['foo', 'bar', 'baz'];
-        $this->assertEquals($this->toObject($exp), $data);
+        $this->assertEquals($exp, $data);
     }
 
     public function testEncodeNestedArrayFails()
@@ -97,7 +86,7 @@ class NvpQueryParserTest extends TestCase
 
         $data['foo']['bar'] = 1;
 
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $service->encode($data);
     }
 
@@ -108,7 +97,7 @@ class NvpQueryParserTest extends TestCase
 
         $data['foo'] = new \stdClass();
 
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $service->encode($data);
     }
 
@@ -117,7 +106,7 @@ class NvpQueryParserTest extends TestCase
         $data['foo'] = 'bar';
         $data['xxx'] = null;
 
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('foo=bar&xxx', $query);
@@ -125,12 +114,12 @@ class NvpQueryParserTest extends TestCase
 
     public function testDecodeEmptyParameter()
     {
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $data = $service->decode('foo=bar&xxx');
 
         $exp['foo'] = 'bar';
         $exp['xxx'] = null;
-        $this->assertEquals($this->toObject($exp), $data);
+        $this->assertEquals($exp, $data);
     }
 
     public function testEncodeBoolean()
@@ -138,7 +127,7 @@ class NvpQueryParserTest extends TestCase
         $data['foo'] = true;
         $data['bar'] = false;
 
-        $service = new NvpQueryParser();
+        $service = new NvpQuery();
         $query = $service->encode($data);
 
         $this->assertSame('foo=true&bar=false', $query);
