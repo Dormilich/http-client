@@ -3,7 +3,7 @@
 namespace Tests\Decoder;
 
 use Dormilich\HttpClient\Decoder\Decoder;
-use Dormilich\HttpClient\Transformer\TransformerInterface;
+use Dormilich\HttpClient\Transformer\DataDecoderInterface;
 use Dormilich\HttpClient\Utility\StatusMatcher;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -21,7 +21,7 @@ class DecoderTest extends TestCase
     {
         $type = uniqid();
 
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataDecoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn($type);
@@ -41,7 +41,7 @@ class DecoderTest extends TestCase
     {
         $type = uniqid();
 
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataDecoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn($type);
@@ -66,7 +66,7 @@ class DecoderTest extends TestCase
     {
         $type = uniqid();
 
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataDecoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn($type);
@@ -90,7 +90,7 @@ class DecoderTest extends TestCase
      */
     public function testDecoderMatchesContentTypes(string $type)
     {
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataDecoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn('application/json');
@@ -109,7 +109,7 @@ class DecoderTest extends TestCase
 
     public function testDecoderIgnoresInvalidContentType()
     {
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataDecoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn('application/json');
@@ -131,7 +131,7 @@ class DecoderTest extends TestCase
         $data = new \stdClass();
         $content = uniqid();
 
-        $transformer = $this->createMock(TransformerInterface::class);
+        $transformer = $this->createMock(DataDecoderInterface::class);
         $transformer
             ->expects($this->once())
             ->method('decode')

@@ -8,7 +8,10 @@ use Dormilich\HttpClient\Encoder\Encoder;
 use Dormilich\HttpClient\Encoder\EncoderInterface;
 use Dormilich\HttpClient\Exception\RequestException;
 use Dormilich\HttpClient\Exception\UnsupportedDataTypeException;
+use Dormilich\HttpClient\Transformer\DataDecoderInterface;
+use Dormilich\HttpClient\Transformer\DataEncoderInterface;
 use Dormilich\HttpClient\Transformer\TransformerInterface;
+use Dormilich\HttpClient\Transformer\TypeInterface;
 use Dormilich\HttpClient\Utility\Header;
 use Dormilich\HttpClient\Utility\StatusMatcher;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -74,20 +77,39 @@ class Client
     }
 
     /**
-     * Add encoder and decoder for a transformer.
+     * Add data encoder and/or decoder. A decoder is assumed to be used for
+     * successful responses only.
      *
-     * @param TransformerInterface $transformer
-     * @param StatusMatcher|null $matcher
+     * @param TypeInterface $transformer (PHP 7 work around for union types)
      * @return self
      */
-    public function addTransformer(TransformerInterface $transformer, StatusMatcher $matcher = null): self
+    public function addTransformer(TypeInterface $transformer): self
     {
-        $encoder = new Encoder($this->streamFactory, $transformer);
-        $decoder = new Decoder($transformer);
-        if ($matcher) {
-            $decoder->setStatusMatcher($matcher);
+
+        if ($transformer instanceof DataEncoderInterface) {
+            $encoder = new Encoder($this->streamFactory, $transformer);
+            $this->addEncoder($encoder);
         }
-        return $this->addDecoder($decoder)->addEncoder($encoder);
+        if ($transformer instanceof DataDecoderInterface) {
+            $decoder = new Decoder($transformer);
+            $decoder->setStatusMatcher($this->getSuccessMatcher());
+            $this->addDecoder($decoder);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return StatusMatcher
+     */
+    private function getSuccessMatcher(): StatusMatcher
+    {
+        static $matcher;
+
+        if (!$matcher) {
+            $matcher = StatusMatcher::success();
+        }
+        return $matcher;
     }
 
     /**

@@ -498,7 +498,7 @@ class ClientTest extends TestCase
             ->willReturn($expected);
 
         $client = new Client($http, $factory, $stream);
-        $client->addTransformer($transformer, StatusMatcher::any());
+        $client->addTransformer($transformer);
         $result = $client->post('https://example.com', $data);
 
         $this->assertSame($expected, $result);

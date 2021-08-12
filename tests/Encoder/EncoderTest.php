@@ -4,7 +4,7 @@ namespace Tests\Encoder;
 
 use Dormilich\HttpClient\Encoder\Encoder;
 use Dormilich\HttpClient\Exception\EncoderException;
-use Dormilich\HttpClient\Transformer\TransformerInterface;
+use Dormilich\HttpClient\Transformer\DataEncoderInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
@@ -22,7 +22,7 @@ class EncoderTest extends TestCase
         $type = uniqid();
 
         $factory = $this->createStub(StreamFactoryInterface::class);
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataEncoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn($type);
@@ -39,7 +39,7 @@ class EncoderTest extends TestCase
     public function testEncoderSupportsData(bool $boolean)
     {
         $factory = $this->createStub(StreamFactoryInterface::class);
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataEncoderInterface::class);
         $transformer
             ->method('supports')
             ->willReturn($boolean);
@@ -60,7 +60,7 @@ class EncoderTest extends TestCase
         $data = new \stdClass();
         $content = uniqid();
 
-        $transformer = $this->createMock(TransformerInterface::class);
+        $transformer = $this->createMock(DataEncoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn('text/plain');
@@ -114,7 +114,7 @@ class EncoderTest extends TestCase
         $data = new \stdClass();
         $content = uniqid();
 
-        $transformer = $this->createMock(TransformerInterface::class);
+        $transformer = $this->createMock(DataEncoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn('text/plain');
@@ -165,7 +165,7 @@ class EncoderTest extends TestCase
         $data = new \stdClass();
         $content = uniqid();
 
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataEncoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn('text/plain');
@@ -201,7 +201,7 @@ class EncoderTest extends TestCase
     {
         $data = new \stdClass();
 
-        $transformer = $this->createStub(TransformerInterface::class);
+        $transformer = $this->createStub(DataEncoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn('text/plain');
@@ -233,7 +233,7 @@ class EncoderTest extends TestCase
     {
         $this->expectException(EncoderException::class);
 
-        $transformer = $this->createMock(TransformerInterface::class);
+        $transformer = $this->createMock(DataEncoderInterface::class);
         $transformer
             ->method('contentType')
             ->willReturn('text/plain');

@@ -5,9 +5,7 @@ namespace Dormilich\HttpClient\Transformer;
 use Dormilich\HttpClient\Utility\PhpQuery;
 use Dormilich\HttpClient\Utility\QueryParser;
 
-use function is_array;
-
-class UrlTransformer implements TransformerInterface
+class UrlEncoder implements DataEncoderInterface
 {
     private QueryParser $parser;
 
@@ -33,14 +31,6 @@ class UrlTransformer implements TransformerInterface
     public function encode($data): string
     {
         return $this->parser->encode($data);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function decode(string $content)
-    {
-        return $this->parser->decode($content);
     }
 
     /**

@@ -2,21 +2,23 @@
 
 namespace Dormilich\HttpClient\Decoder;
 
-use Dormilich\HttpClient\Exception\DecoderException;
-use Dormilich\HttpClient\Transformer\TransformerInterface;
+use Dormilich\HttpClient\Transformer\DataDecoderInterface;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * Wrapper class for data decoders.
+ */
 class Decoder implements DecoderInterface
 {
-    private TransformerInterface $transformer;
-
     use ContentTypeTrait;
     use StatusCodeTrait;
 
+    private DataDecoderInterface $transformer;
+
     /**
-     * @param TransformerInterface $transformer
+     * @param DataDecoderInterface $transformer
      */
-    public function __construct(TransformerInterface $transformer)
+    public function __construct(DataDecoderInterface $transformer)
     {
         $this->transformer = $transformer;
     }

@@ -2,24 +2,27 @@
 
 namespace Dormilich\HttpClient\Encoder;
 
-use Dormilich\HttpClient\Transformer\TransformerInterface;
+use Dormilich\HttpClient\Transformer\DataEncoderInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 
 use function strlen;
 use function strtoupper;
 
+/**
+ * Wrapper class for data encoders.
+ */
 class Encoder implements EncoderInterface
 {
-    private TransformerInterface $transformer;
-
     use ContentTrait;
+
+    private DataEncoderInterface $transformer;
 
     /**
      * @param StreamFactoryInterface $factory
-     * @param TransformerInterface $transformer
+     * @param DataEncoderInterface $transformer
      */
-    public function __construct(StreamFactoryInterface $factory, TransformerInterface $transformer)
+    public function __construct(StreamFactoryInterface $factory, DataEncoderInterface $transformer)
     {
         $this->setFactory($factory);
         $this->transformer = $transformer;
