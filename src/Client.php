@@ -10,7 +10,6 @@ use Dormilich\HttpClient\Exception\RequestException;
 use Dormilich\HttpClient\Exception\UnsupportedDataTypeException;
 use Dormilich\HttpClient\Transformer\DataDecoderInterface;
 use Dormilich\HttpClient\Transformer\DataEncoderInterface;
-use Dormilich\HttpClient\Transformer\TransformerInterface;
 use Dormilich\HttpClient\Transformer\TypeInterface;
 use Dormilich\HttpClient\Utility\Header;
 use Dormilich\HttpClient\Utility\StatusMatcher;

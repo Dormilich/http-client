@@ -21,10 +21,9 @@ class DecoderTest extends TestCase
     {
         $type = uniqid();
 
-        $transformer = $this->createStub(DataDecoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn($type);
+        $transformer = $this->createConfiguredMock(DataDecoderInterface::class, [
+            'contentType' => $type,
+        ]);
 
         $decoder = new Decoder($transformer);
 
@@ -41,17 +40,13 @@ class DecoderTest extends TestCase
     {
         $type = uniqid();
 
-        $transformer = $this->createStub(DataDecoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn($type);
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn($code);
-        $response
-            ->method('getHeaderLine')
-            ->willReturn($type);
+        $transformer = $this->createConfiguredMock(DataDecoderInterface::class, [
+            'contentType' => $type,
+        ]);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => $code,
+            'getHeaderLine' => $type,
+        ]);
 
         $decoder = new Decoder($transformer);
 
@@ -66,17 +61,13 @@ class DecoderTest extends TestCase
     {
         $type = uniqid();
 
-        $transformer = $this->createStub(DataDecoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn($type);
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn($code);
-        $response
-            ->method('getHeaderLine')
-            ->willReturn($type);
+        $transformer = $this->createConfiguredMock(DataDecoderInterface::class, [
+            'contentType' => $type,
+        ]);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => $code,
+            'getHeaderLine' => $type,
+        ]);
 
         $decoder = new Decoder($transformer);
         $decoder->setStatusMatcher(StatusMatcher::success());
@@ -90,17 +81,13 @@ class DecoderTest extends TestCase
      */
     public function testDecoderMatchesContentTypes(string $type)
     {
-        $transformer = $this->createStub(DataDecoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn('application/json');
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn(200);
-        $response
-            ->method('getHeaderLine')
-            ->willReturn($type);
+        $transformer = $this->createConfiguredMock(DataDecoderInterface::class, [
+            'contentType' => 'application/json',
+        ]);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => 200,
+            'getHeaderLine' => $type,
+        ]);
 
         $decoder = new Decoder($transformer);
 
@@ -109,17 +96,13 @@ class DecoderTest extends TestCase
 
     public function testDecoderIgnoresInvalidContentType()
     {
-        $transformer = $this->createStub(DataDecoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn('application/json');
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn(200);
-        $response
-            ->method('getHeaderLine')
-            ->willReturn('application/octet-stream');
+        $transformer = $this->createConfiguredMock(DataDecoderInterface::class, [
+            'contentType' => 'application/json',
+        ]);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => 200,
+            'getHeaderLine' => 'application/octet-stream',
+        ]);
 
         $decoder = new Decoder($transformer);
 
@@ -131,20 +114,18 @@ class DecoderTest extends TestCase
         $data = new \stdClass();
         $content = uniqid();
 
+        $stream = $this->createConfiguredMock(StreamInterface::class, [
+            '__toString' => $content,
+        ]);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getBody' => $stream,
+        ]);
         $transformer = $this->createMock(DataDecoderInterface::class);
         $transformer
             ->expects($this->once())
             ->method('decode')
             ->with($this->identicalTo($content))
             ->willReturn($data);
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('__toString')
-            ->willReturn($content);
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getBody')
-            ->willReturn($stream);
 
         $decoder = new Decoder($transformer);
         $result = $decoder->unserialize($response);

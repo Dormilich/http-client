@@ -8,7 +8,6 @@ use Dormilich\HttpClient\Encoder\EncoderInterface;
 use Dormilich\HttpClient\Exception\RequestException;
 use Dormilich\HttpClient\Exception\UnsupportedDataTypeException;
 use Dormilich\HttpClient\Transformer\TransformerInterface;
-use Dormilich\HttpClient\Utility\StatusMatcher;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
@@ -47,30 +46,20 @@ class ClientTest extends TestCase
 
     private function response(string $data, int $status)
     {
-        $body = $this->createStub(StreamInterface::class);
-        $body
-            ->method('__toString')
-            ->willReturn($data);
-
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn($status);
-        $response
-            ->method('getBody')
-            ->willReturn($body);
-
-        return $response;
+        $body = $this->createConfiguredMock(StreamInterface::class, [
+            '__toString' => $data,
+        ]);
+        return $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => $status,
+            'getBody' => $body,
+        ]);
     }
 
     private function factory(RequestInterface $request = null)
     {
-        $factory = $this->createStub(RequestFactoryInterface::class);
-        $factory
-            ->method('createRequest')
-            ->willReturn($request ?: $this->request());
-
-        return $factory;
+        return $this->createConfiguredMock(RequestFactoryInterface::class, [
+            'createRequest' => $request ?: $this->request(),
+        ]);
     }
 
     private function http(string $data, int $status)

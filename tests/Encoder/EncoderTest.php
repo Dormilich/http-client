@@ -22,10 +22,9 @@ class EncoderTest extends TestCase
         $type = uniqid();
 
         $factory = $this->createStub(StreamFactoryInterface::class);
-        $transformer = $this->createStub(DataEncoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn($type);
+        $transformer = $this->createConfiguredMock(DataEncoderInterface::class, [
+            'contentType' => $type,
+        ]);
         
         $encoder = new Encoder($factory, $transformer);
         
@@ -39,10 +38,9 @@ class EncoderTest extends TestCase
     public function testEncoderSupportsData(bool $boolean)
     {
         $factory = $this->createStub(StreamFactoryInterface::class);
-        $transformer = $this->createStub(DataEncoderInterface::class);
-        $transformer
-            ->method('supports')
-            ->willReturn($boolean);
+        $transformer = $this->createConfiguredMock(DataEncoderInterface::class, [
+            'supports' => $boolean,
+        ]);
 
         $encoder = new Encoder($factory, $transformer);
         
@@ -165,13 +163,10 @@ class EncoderTest extends TestCase
         $data = new \stdClass();
         $content = uniqid();
 
-        $transformer = $this->createStub(DataEncoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn('text/plain');
-        $transformer
-            ->method('encode')
-            ->willReturn($content);
+        $transformer = $this->createConfiguredMock(DataEncoderInterface::class, [
+            'contentType' => 'text/plain',
+            'encode' => $content,
+        ]);
 
         $factory = $this->createStub(StreamFactoryInterface::class);
 
@@ -201,13 +196,10 @@ class EncoderTest extends TestCase
     {
         $data = new \stdClass();
 
-        $transformer = $this->createStub(DataEncoderInterface::class);
-        $transformer
-            ->method('contentType')
-            ->willReturn('text/plain');
-        $transformer
-            ->method('encode')
-            ->willReturn('');
+        $transformer = $this->createConfiguredMock(DataEncoderInterface::class, [
+            'contentType' => 'text/plain',
+            'encode' => '',
+        ]);
 
         $factory = $this->createStub(StreamFactoryInterface::class);
 

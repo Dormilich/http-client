@@ -21,10 +21,9 @@ class ErrorDecoderTest extends TestCase
      */
     public function testDecoderSupportsErrorResponse(int $code)
     {
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn($code);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => $code,
+        ]);
 
         $decoder = new ErrorDecoder();
 
@@ -33,10 +32,9 @@ class ErrorDecoderTest extends TestCase
 
     public function testDecoderIgnoresSuccessResponse()
     {
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn(200);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => 200,
+        ]);
 
         $decoder = new ErrorDecoder();
 
@@ -56,17 +54,13 @@ class ErrorDecoderTest extends TestCase
         $this->expectExceptionCode(400);
         $this->expectExceptionMessage('this did not work');
 
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('__toString')
-            ->willReturn('this did not work');
-        $response = $this->createStub(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn(400);
-        $response
-            ->method('getBody')
-            ->willReturn($stream);
+        $stream = $this->createConfiguredMock(StreamInterface::class, [
+            '__toString' => 'this did not work',
+        ]);
+        $response = $this->createConfiguredMock(ResponseInterface::class, [
+            'getStatusCode' => 400,
+            'getBody' => $stream,
+        ]);
 
         $decoder = new ErrorDecoder();
         $decoder->unserialize($response);

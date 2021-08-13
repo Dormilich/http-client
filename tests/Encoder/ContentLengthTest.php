@@ -28,7 +28,7 @@ class ContentLengthTest extends TestCase
             ->willReturn('POST');
         $request
             ->method('hasHeader')
-            ->willReturn(true);
+            ->willReturnMap([['Transfer-Encoding', true]]);
 
         $encoder = new ContentLength();
 
@@ -37,10 +37,9 @@ class ContentLengthTest extends TestCase
 
     public function testAddContentLength()
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getSize')
-            ->willReturn(12345);
+        $stream = $this->createConfiguredMock(StreamInterface::class, [
+            'getSize' => 12345,
+        ]);
         $request = $this->createMock(RequestInterface::class);
         $request
             ->method('getBody')
@@ -60,10 +59,9 @@ class ContentLengthTest extends TestCase
 
     public function testIgnoreEmptyContentLength()
     {
-        $stream = $this->createStub(StreamInterface::class);
-        $stream
-            ->method('getSize')
-            ->willReturn(0);
+        $stream = $this->createConfiguredMock(StreamInterface::class, [
+            'getSize' => 0,
+        ]);
         $request = $this->createMock(RequestInterface::class);
         $request
             ->method('getBody')
